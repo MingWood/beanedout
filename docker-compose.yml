@@ -14,4 +14,19 @@ services:
       - 3306:3306
     volumes:
       - beanedout:/var/lib/mysql_cup
-    # (this is just an example, not intended to be a production configuration)
+  cupping_manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cupping_manager
+    depends_on:
+      - db
+    volumes:
+      - ./connectors/credentials.json:/usr/src/app/connectors/credentials.json
+      - ./connectors/token.json:/usr/src/app/connectors/token.json
+    environment:
+      - APP_ENV=development
+    command: ["execute_cron"]
+
+volumes:
+  beanedout:

@@ -1,7 +1,6 @@
 import pprint
 import argparse
 
-from src.schema import CupManagementDB
 from src.schema import (
     Users,
     Cuppings,
@@ -15,6 +14,7 @@ from src.workflows import (
     create_bean_and_roast
 )
 from executors.cron import PyCronExecutor
+from connectors.database_connect import CupManagementMySQLDB
 from connectors.email_connect import Gmail
 
 def connect_db():
@@ -27,7 +27,7 @@ def connect_db():
         roasts = None
         cuppings_samples = None
         def __init__(self):
-            self.db = CupManagementDB()
+            self.db = CupManagementMySQLDB()
             self.users = Users(self.db)
             self.cuppings = Cuppings(self.db)
             self.roasting_platforms = RoastingPlatforms(self.db)
