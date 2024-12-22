@@ -1,7 +1,7 @@
 from datetime import datetime
 import pycron
 
-SCHEDULE = "* * * * * */8"
+SCHEDULE = "*/1 * * * *"
 
 class PyCronExecutor(object):
     cron_func = None
@@ -22,4 +22,4 @@ if __name__ == '__main__':
         print('im a test')
     test = PyCronExecutor(example_func)
     test.start_cron()
-    
+

@@ -15,9 +15,7 @@ services:
     volumes:
       - beanedout:/var/lib/mysql_cup
   cupping_manager:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cupping_manager:latest
     container_name: cupping_manager
     depends_on:
       - db

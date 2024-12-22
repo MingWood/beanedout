@@ -94,11 +94,14 @@ if __name__ == '__main__':
 
     if args.function == 'create_tables':
         create_tables()
+        print('completed creating tables')
     elif args.function == 'seed_tables':
         seed_tables()
+        print('completed seeding tables')
     elif args.function == 'test_insert':
         test_insert()
     elif args.function == 'read_gmail_and_insert':
         read_gmail_and_insert()
     elif args.function == 'execute_cron':
+        print('Starting email cron polling')
         execute_cron_on_email()
