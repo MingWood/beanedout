@@ -105,3 +105,6 @@ if __name__ == '__main__':
     elif args.function == 'execute_cron':
         print('Starting email cron polling')
         execute_cron_on_email()
+    elif args.function == 'hello_world':
+        print('hello_world')
+
