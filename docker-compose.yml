@@ -30,6 +30,8 @@ services:
   shopify_connect:
     image: beaned_out:latest
     container_name: shopify_web
+    depends_on:
+      - db
     volumes:
       - ./connectors/credentials.json:/usr/src/app/connectors/credentials.json
       - ./connectors/token.json:/usr/src/app/connectors/token.json
