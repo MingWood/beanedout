@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 60s  # Scrape targets every 15 seconds
+  evaluation_interval: 60s # Rule evaluation frequency
+
+scrape_configs:
+  - job_name: "beanedout-web"
+    static_configs:
+      - targets: ["localhost:5234"]
+
+remote_write:
+  - url: "https://prometheus-prod-36-prod-us-west-0.grafana.net/api/prom/push"
+    basic_auth:
+      username: ""
+      password: ""

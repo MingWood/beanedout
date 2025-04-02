@@ -329,3 +329,81 @@ class CuppingsSamples(Table):
             defect_faults_modifier,
             brew_style
         ))
+
+class OnlineOrders(Table):
+    def _create_statement(self):
+        # {} -> "id": 6388378009884,
+        # {} -> "created_at": "2025-04-01T01:57:54-04:00",
+        return '''
+        CREATE TABLE IF NOT EXISTS `online_orders` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `platform` varchar(64) COLLATE utf8_bin NOT NULL,
+        `order_id` bigint(24) NOT NULL,
+        `date_added_epoch_s` int(11) NOT NULL,
+        `order_created_at` int(11) NOT NULL,
+        PRIMARY KEY (`id`),
+        UNIQUE (order_id)
+        );
+        '''
+
+    def _insert_statement(self):
+        return '''
+        INSERT INTO `online_orders` (`platform`, `order_id`, `date_added_epoch_s`, `order_created_at`) VALUES (%s, %s, %s, %s)
+        '''
+
+    def _find_orders_greater_than_date(self):
+        return '''
+        SELECT * from online_orders where order_created_at > %s;
+        '''
+    
+    def _multi_find_joined_line_items_greater_than_date(self):
+        return '''
+        SELECT o.order_id, o.id, o.platform, o.order_created_at,
+         l.title, l.variant_title from online_orders o join line_items l on o.order_id=l.online_orders_order_id
+        where o.order_created_at > %s;
+        '''
+    
+    def insert(self, platform, order_id, order_created_at):
+        self.insert_into_table((platform, order_id, datetime.datetime.now().timestamp(), order_created_at))
+
+    def find_orders_greater_than_date(self, date):
+        orders = self.db.execute_sql(self._find_orders_greater_than_date(), date, fetch=True)
+        return orders
+    
+    def multi_find_joined_line_items_greater_than_date(self, date):
+        orders = self.db.execute_sql(self._multi_find_joined_line_items_greater_than_date(), date, fetch=True)
+        return orders
+
+
+class LineItems(Table):
+    def _create_statement(self):
+        # {} -> "line_items"[] -> "title": "Granja Paraiso 92 Decaf - Colombia",
+        # {} -> "line_items"[] -> "variant_title": "284g / 10oz",
+        return '''
+        CREATE TABLE IF NOT EXISTS `line_items` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `online_orders_order_id` bigint(24) NOT NULL ,
+        `title` varchar(255) COLLATE utf8_bin NOT NULL,
+        `variant_title` varchar(255) COLLATE utf8_bin NOT NULL,
+        PRIMARY KEY (`id`)
+        );
+        '''
+
+    def _insert_statement(self):
+        return '''
+        INSERT INTO `line_items` (`online_orders_order_id`, `title`, `variant_title`) VALUES (%s, %s, %s)
+        '''
+
+    def _find_by_order_id(self):
+        return '''
+        SELECT * from line_items where online_orders_order_id = %s;
+        '''
+
+    def insert(self, online_orders_order_id, title, variant_title):
+        self.insert_into_table((online_orders_order_id, title, variant_title))
+
+    def find_id_by_order_id(self, id):
+        line_items = self.db.execute_sql(self._find_by_order_id(), id, fetch=True)
+        return line_items
+    
+    

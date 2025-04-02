@@ -1,14 +1,17 @@
 appnope==0.1.4
 asttokens==3.0.0
 backcall==0.2.0
+blinker==1.8.2
 cachetools==5.5.0
 certifi==2024.12.14
 cffi==1.17.1
 charset-normalizer==3.4.0
+click==8.1.8
 croniter==6.0.0
 cryptography==44.0.0
 decorator==5.1.1
 executing==2.1.0
+flask==3.0.3
 google-api-core==2.24.0
 google-api-python-client==2.156.0
 google-auth==2.37.0
@@ -17,9 +20,13 @@ google-auth-oauthlib==1.2.1
 googleapis-common-protos==1.66.0
 httplib2==0.22.0
 idna==3.10
+importlib-metadata==8.5.0
 ipdb==0.13.13
 ipython==8.12.3
+itsdangerous==2.2.0
 jedi==0.19.2
+jinja2==3.1.6
+MarkupSafe==2.1.5
 matplotlib-inline==0.1.7
 numpy==1.24.4
 oauthlib==3.2.2
@@ -27,6 +34,7 @@ pandas==2.0.3
 parso==0.8.4
 pexpect==4.9.0
 pickleshare==0.7.5
+prometheus-client==0.21.1
 prompt-toolkit==3.0.48
 proto-plus==1.25.0
 protobuf==5.29.2
@@ -53,3 +61,5 @@ tzdata==2024.2
 uritemplate==4.1.1
 urllib3==2.2.3
 wcwidth==0.2.13
+werkzeug==3.0.6
+zipp==3.20.2

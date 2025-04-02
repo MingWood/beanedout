@@ -8,17 +8,22 @@ from src.schema import (
     Beans,
     Roasts,
     CuppingsSamples,
+    OnlineOrders,
+    LineItems
 )
 from src.workflows import (
     decode_cupping_text_and_insert,
     create_bean_and_roast
 )
 from executors.cron import PyCronExecutor
+from executors.web_server import WebServer
 from connectors.database_connect import CupManagementMySQLDB
 from connectors.email_connect import Gmail
+from connectors.shopify_api_connect import Shopify
+
 
 def connect_db():
-    class CuppingTables():    
+    class CupManagementDB():
         db = None
         users = None
         cuppings = None
@@ -26,6 +31,9 @@ def connect_db():
         beans = None
         roasts = None
         cuppings_samples = None
+        online_orders = None
+        line_items = None
+
         def __init__(self):
             self.db = CupManagementMySQLDB()
             self.users = Users(self.db)
@@ -34,7 +42,9 @@ def connect_db():
             self.beans = Beans(self.db)
             self.roasts = Roasts(self.db)
             self.cuppings_samples = CuppingsSamples(self.db)
-    return CuppingTables()
+            self.online_orders = OnlineOrders(self.db)
+            self.line_items = LineItems(self.db)
+    return CupManagementDB()
 
 def create_tables():
     db = connect_db()
@@ -44,6 +54,8 @@ def create_tables():
     db.beans.create_table()
     db.roasts.create_table()
     db.cuppings_samples.create_table()
+    db.online_orders.create_table()
+    db.line_items.create_table()
     db.db.close()
 
 def seed_tables():
@@ -80,6 +92,10 @@ def execute_cron_on_email():
     executor = PyCronExecutor(read_gmail_and_insert)
     executor.start_cron()
 
+def start_api_server():
+    db = connect_db()
+    server = WebServer(db, Shopify('moonwake-coffee-roasters'))
+    server.run(debug=False)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run specific commands.")
@@ -88,7 +104,8 @@ if __name__ == '__main__':
         'seed_tables',
         'test_insert',
         'read_gmail_and_insert',
-        'execute_cron'
+        'execute_cron',
+        'start_api_server'
     ], help="Function to execute")
     args = parser.parse_args()
 
@@ -105,6 +122,9 @@ if __name__ == '__main__':
     elif args.function == 'execute_cron':
         print('Starting email cron polling')
         execute_cron_on_email()
+    elif args.function == 'start_api_server':
+        print('Starting API server')
+        start_api_server()
     elif args.function == 'hello_world':
         print('hello_world')
 
