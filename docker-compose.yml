@@ -3,17 +3,17 @@ version: '3.1'
 
 services:
 
-  db:
-    image: mysql
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: coferment
-      MYSQL_DATABASE: cup_management
-    ports:
-      - 3306:3306
-    volumes:
-      - beanedout:/var/lib/mysql_cup
+  # db:
+  #   image: mysql
+  #   container_name: mysql
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: coferment
+  #     MYSQL_DATABASE: cup_management
+  #   ports:
+  #     - 3306:3306
+  #   volumes:
+  #     - beanedout:/var/lib/mysql_cup
   # cupping_manager:
   #   image: beaned_out:latest
   #   container_name: cupping_manager

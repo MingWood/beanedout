@@ -93,7 +93,7 @@ def execute_cron_on_email():
     executor.start_cron()
 
 def start_api_server():
-    db = connect_db()
+    db = None
     server = WebServer(db, Shopify('moonwake-coffee-roasters'))
     server.run(debug=False)
 
