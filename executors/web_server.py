@@ -41,8 +41,10 @@ class WebServer(object):
         """
         while True:
             comb_aggs = {}
+            inventory_aggs = {}
             for api in self.shop_apis:
                 comb_aggs[api.url] = api.fetch_and_aggregate_orders()
+                inventory_aggs[api.nickname[api.url]] = api.fetch_and_aggregate_inventory()
 
             superset_items = set()
             for k, v in comb_aggs.items():
@@ -64,6 +66,10 @@ class WebServer(object):
                 self.bag_quantity_tracker.labels(coffee_name=k).set(v['quantity'])
                 self.roasted_weight_tracker.labels(coffee_name=k).set(v['total_weight_g'])
 
+            for site, metrics in inventory_aggs.items():
+                for variant, count in metrics.items():
+                    self.inventory_count.labels(coffee_variant_name=variant,site=site).set(count)
+
             time.sleep(WebServer.metric_refresh_from_api_interval_seconds)
 
     def setup_prometheus(self):
@@ -76,6 +82,11 @@ class WebServer(object):
             'weight_ordered',
             'total grams of roasted coffee ordered from all orders',
             ["coffee_name"]
+        )
+        self.inventory_count = Gauge(
+            'inventory_count',
+            'number of items left in stock for item',
+            ["coffee_variant_name", "site"]
         )
 
     def shopify_webhook(self):
