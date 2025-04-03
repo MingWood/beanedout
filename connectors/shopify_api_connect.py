@@ -44,9 +44,12 @@ class Shopify(object):
                 if not item['node']['variant']:
                     weight = ''
                 else:
-                    weight = item['node']['variant']['title'] # 'title': '227g / 8oz'
+                    weight = item['node']['variant']['title'] # 'title': '227g / 8oz' or 'title': '1kg'
                 try:
-                    weight_parsed = int(weight.split('g')[0])
+                    if 'kg' in weight:
+                        weight_parsed = int(weight.split('kg')[0]) * 1000
+                    else:
+                        weight_parsed = int(weight.split('g')[0])
                 except:
                     weight_parsed = 0
                 if not aggregate_items.get(title):
