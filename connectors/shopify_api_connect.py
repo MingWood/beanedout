@@ -21,9 +21,8 @@ class Shopify(object):
             "Content-Type": "application/json"
         }
         payload = {
-          "query": "query { orders(first: 250, reverse: true, query: \"fulfillment_status:unfulfilled\", sortKey: CREATED_AT) { edges { node { id name createdAt totalPriceSet { shopMoney { amount currencyCode } } lineItems(first: 250) { edges { node { title quantity variant { id title sku } } } } } } pageInfo { hasPreviousPage hasNextPage startCursor endCursor } } }"
+            "query": "query { orders(first: 250, reverse: true, query: \"fulfillment_status:unfulfilled\", sortKey: CREATED_AT) { edges { node { id name createdAt totalPriceSet { shopMoney { amount currencyCode } } lineItems(first: 250) { edges { node { title quantity variant { id title sku } } } } fulfillmentOrders(first: 5) { edges { node { status } } } } } pageInfo { hasPreviousPage hasNextPage startCursor endCursor } } }"
         }
-
         response = requests.post(self.url, json=payload, headers=headers)
         
         if response.status_code == 200:
@@ -32,12 +31,14 @@ class Shopify(object):
             raise Exception(f"GraphQL Query Failed: {response.status_code}, {response.text}")
 
     def fetch_and_aggregate_orders(self):
-        print('executing')
+        print('executing shopify fetch')
         raw_orders = self.fetch_unfullfilled_orders()
-        raw_orders['data']['orders']['edges'][0]['node']['lineItems']['edges'][0]['node']['title']
 
         aggregate_items = {}
         for order in raw_orders['data']['orders']['edges']:
+            if order['node']['fulfillmentOrders']['edges'][0]['node']['status'] != 'OPEN':
+                # filters out ready for pickup orders
+                continue
             for item in order['node']['lineItems']['edges']:
                 title = item['node']['title']
                 qty = item['node']['quantity']
