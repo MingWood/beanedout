@@ -40,35 +40,38 @@ class WebServer(object):
         Runs in a background thread.
         """
         while True:
-            comb_aggs = {}
-            inventory_aggs = {}
-            for api in self.shop_apis:
-                comb_aggs[api.url] = api.fetch_and_aggregate_orders()
-                inventory_aggs[api.nickname[api.url]] = api.fetch_and_aggregate_inventory()
+            try:
+                comb_aggs = {}
+                inventory_aggs = {}
+                for api in self.shop_apis:
+                    comb_aggs[api.url] = api.fetch_and_aggregate_orders()
+                    inventory_aggs[api.nickname[api.url]] = api.fetch_and_aggregate_inventory()
 
-            superset_items = set()
-            for k, v in comb_aggs.items():
-                superset_items = superset_items | set(v.keys())
-
-            new_agg = {}
-            for item in superset_items:
-                merged_metric = {
-                    "quantity": 0,
-                    "total_weight_g": 0
-                }
+                superset_items = set()
                 for k, v in comb_aggs.items():
-                    metric = v.get(item, {})
-                    merged_metric['quantity'] = merged_metric['quantity'] + metric.get('quantity', 0)
-                    merged_metric['total_weight_g'] = merged_metric['total_weight_g'] + metric.get('total_weight_g', 0)
-                new_agg[item] = merged_metric
+                    superset_items = superset_items | set(v.keys())
 
-            for k, v in new_agg.items():
-                self.bag_quantity_tracker.labels(coffee_name=k).set(v['quantity'])
-                self.roasted_weight_tracker.labels(coffee_name=k).set(v['total_weight_g'])
+                new_agg = {}
+                for item in superset_items:
+                    merged_metric = {
+                        "quantity": 0,
+                        "total_weight_g": 0
+                    }
+                    for k, v in comb_aggs.items():
+                        metric = v.get(item, {})
+                        merged_metric['quantity'] = merged_metric['quantity'] + metric.get('quantity', 0)
+                        merged_metric['total_weight_g'] = merged_metric['total_weight_g'] + metric.get('total_weight_g', 0)
+                    new_agg[item] = merged_metric
 
-            for site, metrics in inventory_aggs.items():
-                for variant, count in metrics.items():
-                    self.inventory_count.labels(coffee_variant_name=variant,site=site).set(count)
+                for k, v in new_agg.items():
+                    self.bag_quantity_tracker.labels(coffee_name=k).set(v['quantity'])
+                    self.roasted_weight_tracker.labels(coffee_name=k).set(v['total_weight_g'])
+
+                for site, metrics in inventory_aggs.items():
+                    for variant, count in metrics.items():
+                        self.inventory_count.labels(coffee_variant_name=variant,site=site).set(count)
+            except:
+                print('shopify error encountered')
 
             time.sleep(WebServer.metric_refresh_from_api_interval_seconds)
 
