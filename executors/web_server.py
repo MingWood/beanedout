@@ -15,10 +15,10 @@ class WebServer(object):
     app = None
     metric_refresh_from_api_interval_seconds = 1 * 60
 
-    def __init__(self, db, api):
+    def __init__(self, db, apis):
         self.app = Flask(__name__)
         self.db = db
-        self.shop_api = api
+        self.shop_apis = apis
         self.app.wsgi_app = DispatcherMiddleware(self.app.wsgi_app, {
             '/metrics': make_wsgi_app()
         })  
@@ -40,9 +40,27 @@ class WebServer(object):
         Runs in a background thread.
         """
         while True:
-            aggs = self.shop_api.fetch_and_aggregate_orders()
-            
-            for k, v in aggs.items():
+            comb_aggs = {}
+            for api in self.shop_apis:
+                comb_aggs[api.url] = api.fetch_and_aggregate_orders()
+
+            superset_items = set()
+            for k, v in comb_aggs.items():
+                superset_items = superset_items | set(v.keys())
+
+            new_agg = {}
+            for item in superset_items:
+                merged_metric = {
+                    "quantity": 0,
+                    "total_weight_g": 0
+                }
+                for k, v in comb_aggs.items():
+                    metric = v.get(item, {})
+                    merged_metric['quantity'] = merged_metric['quantity'] + metric.get('quantity', 0)
+                    merged_metric['total_weight_g'] = merged_metric['total_weight_g'] + metric.get('total_weight_g', 0)
+                new_agg[item] = merged_metric
+
+            for k, v in new_agg.items():
                 self.bag_quantity_tracker.labels(coffee_name=k).set(v['quantity'])
                 self.roasted_weight_tracker.labels(coffee_name=k).set(v['total_weight_g'])
 
