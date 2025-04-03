@@ -30,12 +30,6 @@ services:
   shopify_connect:
     image: beaned_out:latest
     container_name: shopify_web
-    depends_on:
-      - db
-    volumes:
-      - ./connectors/credentials.json:/usr/src/app/connectors/credentials.json
-      - ./connectors/token.json:/usr/src/app/connectors/token.json
-      - ./connectors/shopify_keys.json:/usr/src/app/connectors/shopify_keys.json
     environment:
       - APP_ENV=development
     ports:
