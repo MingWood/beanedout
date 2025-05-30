@@ -25,7 +25,7 @@ class Shopify(object):
     
     def _fetch_inventory(self):
         return {
-            "query": "query { inventoryItems(first: 250) { edges { node { id sku tracked inventoryLevels(first: 10) { edges { node { item { variant { product { status category { name } totalInventory title } title } } } } } } } pageInfo { hasNextPage endCursor } } }"
+            "query": "query { inventoryItems(first: 250) { edges { node { id sku tracked inventoryLevels(first: 10) { edges { node { item { variant { inventoryQuantity product { status category { name } totalInventory title } title } } } } } } } pageInfo { hasNextPage endCursor } } }"
         }
 
     def fetch_from_shopify(self, query):
@@ -89,10 +89,12 @@ class Shopify(object):
             if category != 'Coffee Beans & Ground Coffee':
                 continue
             concat_title = '{} - {}'.format(variant_title, variant_size)
-            variant_quantity = variant['product']['totalInventory']
+            variant_quantity = variant['inventoryQuantity']
             status = variant['product']['status']
             if status == "ACTIVE":
                 items_with_count[concat_title] = variant_quantity
+            else:
+                items_with_count[concat_title] = 0
         return items_with_count
         
 
