@@ -28,7 +28,7 @@ services:
   #   command: ["execute_cron"]
 
   shopify_connect:
-    image: beaned_out:latest
+    image: beaned_out:v1.2
     container_name: shopify_web
     environment:
       - APP_ENV=development

@@ -94,7 +94,7 @@ class Shopify(object):
             if status == "ACTIVE":
                 items_with_count[concat_title] = variant_quantity
             else:
-                items_with_count[concat_title] = 0
+                items_with_count[concat_title] = -1
         return items_with_count
         
 
